@@ -1,7 +1,7 @@
 arandr-indicator
 ================
 
-Quick and simple tray icon menu for changing the monitor layout.
+Quick and simple tray icon menu for changing the monitor layout. A great companion to ARandR tool.
 
 [![YouTube demonstration](http://img.youtube.com/vi/xqpF6RrYUmo/0.jpg)](http://youtu.be/xqpF6RrYUmo)
 
@@ -40,4 +40,6 @@ Installation
 Credits
 -------
 
-The idea and code organization was inspired by [indicator-chars](https://github.com/tobyS/indicator-chars), written by [Tobias Schlitt](mailto:toby@php.net).
+The need for this tool started with my girlfriend.
+
+The code organization was inspired by [indicator-chars](https://github.com/tobyS/indicator-chars), written by [Tobias Schlitt](mailto:toby@php.net).
