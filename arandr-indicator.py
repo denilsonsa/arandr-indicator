@@ -53,6 +53,7 @@ def run_and_forget(args, **kwargs):
 class ARandRIndicator:
     LAYOUTS_PATH = os.path.expanduser('~/.screenlayout')
     LAYOUTS_GLOB = os.path.join(LAYOUTS_PATH, '*.sh')
+    SELF_PATH = os.path.abspath(__file__)
     MAIN_ICON = 'video-display'
     ARANDR_ICON = 'preferences-desktop-display'
 
@@ -63,6 +64,19 @@ class ARandRIndicator:
 
         self.update_menu()
 
+    def am_i_in_autostart(self):
+        try:
+            filename= xdg.BaseDirectory.load_first_config(
+                'autostart/arandr-indicator.desktop')
+            if not filename:
+                return False
+
+            entry = xdg.DesktopEntry.DesktopEntry()
+            entry.parse(filename)
+            return entry.get('Exec') == self.SELF_PATH
+        except:
+            return False
+
     def create_autostart_desktop_file(self):
         path = xdg.BaseDirectory.save_config_path('autostart')
         filename = os.path.join(path, 'arandr-indicator.desktop')
@@ -71,7 +85,7 @@ class ARandRIndicator:
         entry.set('Name', 'ARandR Indicator')
         entry.set('GenericName', 'Display layout quick menu')
         entry.set('Comment', 'Quickly change between monitor layouts')
-        entry.set('Exec', os.path.abspath(__file__))
+        entry.set('Exec', self.SELF_PATH)
         entry.set('Icon', self.MAIN_ICON)
         entry.set('Terminal', 'false')
         entry.set('StartupNotify', 'false')
@@ -102,8 +116,7 @@ class ARandRIndicator:
         arandr_item.connect('activate', self.on_launch_arandr)
         menu.append(arandr_item)
 
-        if not xdg.BaseDirectory.load_first_config(
-                'autostart/arandr-indicator.desktop'):
+        if not self.am_i_in_autostart():
             autostart_item = gtk.MenuItem()
             autostart_item.set_label('Write autostart file')
             autostart_item.connect('activate', self.on_create_autostart)
