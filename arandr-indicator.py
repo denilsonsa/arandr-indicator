@@ -42,6 +42,8 @@ import os.path
 import re
 import signal
 import subprocess
+import xdg.BaseDirectory
+import xdg.DesktopEntry
 
 
 def run_and_forget(args, **kwargs):
@@ -52,7 +54,7 @@ class ARandRIndicator:
     LAYOUTS_PATH = os.path.expanduser('~/.screenlayout')
     LAYOUTS_GLOB = os.path.join(LAYOUTS_PATH, '*.sh')
     MAIN_ICON = 'video-display'
-    ARANDR_ICON = 'preferences-desktop-display-display'
+    ARANDR_ICON = 'preferences-desktop-display'
 
     def __init__(self):
         self.indicator = appindicator.Indicator(
@@ -61,12 +63,21 @@ class ARandRIndicator:
 
         self.update_menu()
 
-    def on_directory_changed(self, filemonitor, file, other_file, event_type):
-        if event_type in [
-            gio.FILE_MONITOR_EVENT_CHANGES_DONE_HINT,
-            gio.FILE_MONITOR_EVENT_DELETED
-        ]:
-            self.update_menu()
+    def create_autostart_desktop_file(self):
+        path = xdg.BaseDirectory.save_config_path('autostart')
+        filename = os.path.join(path, 'arandr-indicator.desktop')
+        entry = xdg.DesktopEntry.DesktopEntry()
+        entry.new(filename)
+        entry.set('Name', 'ARandR Indicator')
+        entry.set('GenericName', 'Display layout quick menu')
+        entry.set('Comment', 'Quickly change between monitor layouts')
+        entry.set('Exec', os.path.abspath(__file__))
+        entry.set('Icon', self.MAIN_ICON)
+        entry.set('Terminal', 'false')
+        entry.set('StartupNotify', 'false')
+        entry.set('Categories', 'Settings;HardwareSettings;')
+        entry.set('Type', 'Application')
+        entry.write()
 
     def get_layouts(self):
         return sorted(glob.glob(self.LAYOUTS_GLOB))
@@ -91,11 +102,25 @@ class ARandRIndicator:
         arandr_item.connect('activate', self.on_launch_arandr)
         menu.append(arandr_item)
 
+        if not xdg.BaseDirectory.load_first_config(
+                'autostart/arandr-indicator.desktop'):
+            autostart_item = gtk.MenuItem()
+            autostart_item.set_label('Write autostart file')
+            autostart_item.connect('activate', self.on_create_autostart)
+            menu.append(autostart_item)
+
         # quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
         # quit_item.connect('activate', self.on_quit)
         # menu.append(quit_item)
 
         menu.show_all()
+
+    def on_directory_changed(self, filemonitor, file, other_file, event_type):
+        if event_type in [
+                gio.FILE_MONITOR_EVENT_CHANGES_DONE_HINT,
+                gio.FILE_MONITOR_EVENT_DELETED
+        ]:
+            self.update_menu()
 
     def on_item_click(self, widget, name):
         if os.access(name, os.X_OK):
@@ -106,6 +131,10 @@ class ARandRIndicator:
             args = ['/bin/sh', name]
 
         run_and_forget(args, cwd=os.path.dirname(name))
+
+    def on_create_autostart(self, widget):
+        self.create_autostart_desktop_file()
+        self.update_menu()
 
     def on_launch_arandr(self, widget):
         run_and_forget(['arandr'], cwd=self.LAYOUTS_PATH)
