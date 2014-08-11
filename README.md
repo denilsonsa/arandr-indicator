@@ -31,7 +31,7 @@ Installation
 ------------
 
 1. `sudo apt-get install python-appindicator python-gtk2 python-xfd arandr`
-2. Download `arandr-indicator.py` and save it anywhere.
+2. Download [`arandr-indicator.py`](https://raw.githubusercontent.com/denilsonsa/arandr-indicator/master/arandr-indicator.py) and save it anywhere.
 3. `chmod +x arandr-indicator.py` to make it executable.
 4. `./arandr-indicator.py` to execute it.
 5. Add it to autostart, so it runs whenever you login.
