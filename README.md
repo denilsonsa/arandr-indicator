@@ -3,6 +3,8 @@ arandr-indicator
 
 Quick and simple tray icon menu for changing the monitor layout. A great companion to ARandR tool.
 
+Demonstration video on YouTube:
+
 [![YouTube demonstration](http://img.youtube.com/vi/xqpF6RrYUmo/0.jpg)](http://youtu.be/xqpF6RrYUmo)
 
 
