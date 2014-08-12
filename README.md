@@ -45,3 +45,20 @@ Credits
 The need for this tool started with my girlfriend.
 
 The code organization was inspired by [indicator-chars](https://github.com/tobyS/indicator-chars), written by [Tobias Schlitt](mailto:toby@php.net).
+
+
+Further hints and tips
+----------------------
+
+Since the files in `~/.screenlayout/*.sh` are just shell scripts, they can do more than calling `xrandr` to setup the monitors. They can also configure PulseAudio to redirect audio to the HDMI port. Try the following commands:
+
+* To set audio output to HDMI: `pacmd set-card-profile 0 output:hdmi-stereo+input:analog-stereo`
+* To set audio output to analog speakers: `pacmd set-card-profile 0 output:analog-stereo+input:analog-stereo`
+* To see the available cards and profiles in your system: `pacmd list-cads`
+* Nice GUI to configure PulseAudio: `pavucontrol`
+
+Read more:
+
+* https://wiki.archlinux.org/index.php/PulseAudio/Examples
+* http://askubuntu.com/questions/63599/configuring-hdmi-audio-via-command-line
+* http://askubuntu.com/questions/14077/how-can-i-change-the-default-audio-device-from-command-line
