@@ -38,6 +38,9 @@ Installation
 4. `./arandr-indicator.py` to execute it.
 5. Add it to autostart, so it runs whenever you login.
 
+### Pre-built packages
+
+* [arandr-indicator-git](https://aur.archlinux.org/packages/arandr-indicator-git/) for [Arch Linux](https://www.archlinux.org/), written by [thiagowfx](https://github.com/thiagowfx)
 
 How to add icons
 ----------------
@@ -67,7 +70,7 @@ To define an icon for any `~/.screenlayout/*.sh` script, just add a line contain
 Credits
 -------
 
-The need for this tool started with my girlfriend.
+The need for this tool started with my girlfriend's laptop.
 
 The code organization was inspired by [indicator-chars](https://github.com/tobyS/indicator-chars), written by [Tobias Schlitt](mailto:toby@php.net).
 
