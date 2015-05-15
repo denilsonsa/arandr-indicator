@@ -12,7 +12,7 @@ Requirements
 ------------
 
 * [ARandR](http://christian.amsuess.com/tools/arandr/) (optional)
-* Python 2.x
+* Python 2.7
 * [PyGTK](http://www.pygtk.org/)
 * [python-appindicator](https://launchpad.net/libappindicator)
 * [PyXDG](http://freedesktop.org/wiki/Software/pyxdg/) (optional)
@@ -39,6 +39,31 @@ Installation
 5. Add it to autostart, so it runs whenever you login.
 
 
+How to add icons
+----------------
+
+To define an icon for any `~/.screenlayout/*.sh` script, just add a line containing `META:ICON = "icon-name-here"` anywhere in the first 512 bytes of the file. The actual requirements are:
+
+* The line must contain:
+    * `META:ICON` string,
+    * followed by optional whitespace (spaces or tabs),
+    * followed by `=` (equals sign),
+    * followed by optional whitespace (spaces or tabs),
+    * followed by the icon name inside double-quotes.
+* The icon name does not support escapes.
+* The icon name cannot contain the double-quote character.
+* The icon name can be:
+    * A [standard icon name][icon-naming-spec] that is available in your current icon theme.
+    * A filename to be found in `~/.screenlayout/`.
+    * A relative path (will be considered relative to `~/.screenlayout/`).
+    * A path relative to the user home (i.e. beginning with `~`).
+    * An absolute path.
+* The line must be in the first 512 bytes of the file.
+    * This size has been chosen arbitrarily.
+    * Since most scripts in that directory will be very small, this is not an issue.
+    * It is a good idea to put this line as the first line (or one of the first lines) after the [shebang][].
+
+
 Credits
 -------
 
@@ -59,6 +84,10 @@ Since the files in `~/.screenlayout/*.sh` are just shell scripts, they can do mo
 
 Read more:
 
+* https://bitbucket.org/denilsonsa/small_scripts/src/default/screenlayout/
 * https://wiki.archlinux.org/index.php/PulseAudio/Examples
 * http://askubuntu.com/questions/63599/configuring-hdmi-audio-via-command-line
 * http://askubuntu.com/questions/14077/how-can-i-change-the-default-audio-device-from-command-line
+
+[shebang]: https://en.wikipedia.org/wiki/Shebang_%28Unix%29
+[icon-naming-spec]: http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html

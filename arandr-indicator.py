@@ -61,6 +61,7 @@ class ARandRIndicator:
     SELF_PATH = os.path.abspath(__file__)
     MAIN_ICON = 'video-display'
     ARANDR_ICON = 'preferences-desktop-display'
+    LAYOUT_ICON_RE = re.compile(br'META:ICON[ \t]*=[ \t]*"(?P<iconname>[^"]*)"', re.I)
 
     def __init__(self):
         self.indicator = appindicator.Indicator(
@@ -101,6 +102,17 @@ class ARandRIndicator:
     def get_layouts(self):
         return sorted(glob.glob(self.LAYOUTS_GLOB))
 
+    def get_icon_name_from_layout_file(self, filename):
+        with open(filename, 'rb') as f:
+            head = f.read(512)  # First 512 bytes of the file.
+        for line in head.split('\n'):  # Splitting into lines.
+            line = line.strip(' \t\n\r')  # Stripping whitespace.
+            match = self.LAYOUT_ICON_RE.search(line)
+            if match:
+                return match.group('iconname')
+
+        return None
+
     def update_menu(self, widget=None, data=None):
         menu = gtk.Menu()
         self.indicator.set_menu(menu)
@@ -108,7 +120,23 @@ class ARandRIndicator:
         for name in self.get_layouts():
             basename = os.path.basename(name)
             pretty_name = re.sub(r'\.sh$', '', basename).replace('_', ' ')
-            item = gtk.MenuItem(label=pretty_name)
+            icon_name = self.get_icon_name_from_layout_file(name)
+            icon = None
+
+            if icon_name:
+                if '.' in icon_name:
+                    icon_path = os.path.join('LAYOUTS_PATH', os.path.expanduser(icon_name))
+                    icon = gtk.image_new_from_file(icon_path)
+                else:
+                    icon = gtk.image_new_from_icon_name(icon_name, gtk.ICON_SIZE_MENU)
+
+            if icon:
+                item = gtk.ImageMenuItem()
+                item.set_image(icon)
+            else:
+                item = gtk.MenuItem()
+
+            item.set_label(pretty_name)
             item.connect('activate', self.on_item_click, name)
             menu.append(item)
 
