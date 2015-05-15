@@ -42,8 +42,13 @@ import os.path
 import re
 import signal
 import subprocess
-import xdg.BaseDirectory
-import xdg.DesktopEntry
+
+try:
+    import xdg
+    import xdg.BaseDirectory
+    import xdg.DesktopEntry
+except ImportError:
+    xdg = None
 
 
 def run_and_forget(args, **kwargs):
@@ -116,7 +121,7 @@ class ARandRIndicator:
         arandr_item.connect('activate', self.on_launch_arandr)
         menu.append(arandr_item)
 
-        if not self.am_i_in_autostart():
+        if xdg and not self.am_i_in_autostart():
             autostart_item = gtk.MenuItem()
             autostart_item.set_label('Write autostart file')
             autostart_item.connect('activate', self.on_create_autostart)

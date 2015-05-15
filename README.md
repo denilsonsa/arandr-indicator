@@ -11,11 +11,11 @@ Demonstration video on YouTube:
 Requirements
 ------------
 
-* [ARandR](http://christian.amsuess.com/tools/arandr/) (optional!)
+* [ARandR](http://christian.amsuess.com/tools/arandr/) (optional)
 * Python 2.x
 * [PyGTK](http://www.pygtk.org/)
 * [python-appindicator](https://launchpad.net/libappindicator)
-* [PyXDG](http://freedesktop.org/wiki/Software/pyxdg/)
+* [PyXDG](http://freedesktop.org/wiki/Software/pyxdg/) (optional)
 * Some kind of UI that supports [Unity indicators](https://unity.ubuntu.com/projects/appindicators/), should work on Gnome, KDE, Unity, LXDE…
 
 
