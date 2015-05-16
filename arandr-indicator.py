@@ -125,7 +125,7 @@ class ARandRIndicator:
 
             if icon_name:
                 if '.' in icon_name:
-                    icon_path = os.path.join('LAYOUTS_PATH', os.path.expanduser(icon_name))
+                    icon_path = os.path.join(self.LAYOUTS_PATH, os.path.expanduser(icon_name))
                     icon = gtk.image_new_from_file(icon_path)
                 else:
                     icon = gtk.image_new_from_icon_name(icon_name, gtk.ICON_SIZE_MENU)
