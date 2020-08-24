@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Simple arandr menu for changing the monitor layout.
@@ -33,10 +33,12 @@
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 # DAMAGE.
 
-import appindicator
-import gio
+import gi
+gi.require_version('AppIndicator3', '0.1')
+from gi.repository import AppIndicator3 as appindicator
+from gi.repository import Gtk as gtk
+from gi.repository import Gio as gio
 import glob
-import gtk
 import os
 import os.path
 import re
@@ -64,9 +66,9 @@ class ARandRIndicator:
     LAYOUT_ICON_RE = re.compile(br'META:ICON[ \t]*=[ \t]*"(?P<iconname>[^"]*)"', re.I)
 
     def __init__(self):
-        self.indicator = appindicator.Indicator(
-            'ARandR', self.MAIN_ICON, appindicator.CATEGORY_HARDWARE)
-        self.indicator.set_status(appindicator.STATUS_ACTIVE)
+        self.indicator = appindicator.Indicator.new(
+            'ARandR', self.MAIN_ICON, appindicator.IndicatorCategory.HARDWARE)
+        self.indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
 
         self.update_menu()
 
@@ -105,8 +107,8 @@ class ARandRIndicator:
     def get_icon_name_from_layout_file(self, filename):
         with open(filename, 'rb') as f:
             head = f.read(512)  # First 512 bytes of the file.
-        for line in head.split('\n'):  # Splitting into lines.
-            line = line.strip(' \t\n\r')  # Stripping whitespace.
+        for line in head.split(b'\n'):  # Splitting into lines.
+            line = line.strip(b' \t\n\r')  # Stripping whitespace.
             match = self.LAYOUT_ICON_RE.search(line)
             if match:
                 return match.group('iconname')
@@ -126,9 +128,10 @@ class ARandRIndicator:
             if icon_name:
                 if '.' in icon_name:
                     icon_path = os.path.join(self.LAYOUTS_PATH, os.path.expanduser(icon_name))
-                    icon = gtk.image_new_from_file(icon_path)
+                    icon = gtk.Image.new_from_file(icon_path)
                 else:
-                    icon = gtk.image_new_from_icon_name(icon_name, gtk.ICON_SIZE_MENU)
+                    icon = gtk.Image.new_from_icon_name(icon_name,
+                                                        gtk.IconSize.MENU)
 
             if icon:
                 item = gtk.ImageMenuItem()
@@ -145,7 +148,7 @@ class ARandRIndicator:
         arandr_item = gtk.ImageMenuItem()
         arandr_item.set_label('Launch ARandR')
         arandr_item.set_image(
-            gtk.image_new_from_stock(self.ARANDR_ICON, gtk.ICON_SIZE_MENU))
+            gtk.Image.new_from_icon_name(self.ARANDR_ICON, gtk.IconSize.MENU))
         arandr_item.connect('activate', self.on_launch_arandr)
         menu.append(arandr_item)
 
@@ -155,16 +158,17 @@ class ARandRIndicator:
             autostart_item.connect('activate', self.on_create_autostart)
             menu.append(autostart_item)
 
-        # quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT)
-        # quit_item.connect('activate', self.on_quit)
-        # menu.append(quit_item)
+        quit_item = gtk.ImageMenuItem(label=gtk.STOCK_QUIT)
+        quit_item.set_use_stock(True)
+        quit_item.connect('activate', self.on_quit)
+        menu.append(quit_item)
 
         menu.show_all()
 
     def on_directory_changed(self, filemonitor, file, other_file, event_type):
         if event_type in [
-                gio.FILE_MONITOR_EVENT_CHANGES_DONE_HINT,
-                gio.FILE_MONITOR_EVENT_DELETED
+                gio.FileMonitorEvent.CHANGES_DONE_HINT,
+                gio.FileMonitorEvent.DELETED
         ]:
             self.update_menu()
 
@@ -197,8 +201,8 @@ if __name__ == '__main__':
     app = ARandRIndicator()
 
     # Monitor ~/.screenlayout/ changes
-    file = gio.File(app.LAYOUTS_PATH)
-    monitor = file.monitor_directory()
+    file = gio.File.new_for_uri('file://' + app.LAYOUTS_PATH)
+    monitor = file.monitor_directory(gio.FileMonitorFlags.NONE, None)
     monitor.connect('changed', app.on_directory_changed)
 
     # Main gtk loop
