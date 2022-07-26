@@ -38,7 +38,8 @@
 # DAMAGE.
 
 import gi
-gi.require_version('AppIndicator3', '0.1')
+
+gi.require_version("AppIndicator3", "0.1")
 from gi.repository import AppIndicator3 as appindicator
 from gi.repository import Gtk as gtk
 from gi.repository import Gio as gio
@@ -62,59 +63,61 @@ def run_and_forget(args, **kwargs):
 
 
 class ARandRIndicator:
-    LAYOUTS_PATH = os.path.expanduser('~/.screenlayout')
-    LAYOUTS_GLOB = os.path.join(LAYOUTS_PATH, '*.sh')
+    LAYOUTS_PATH = os.path.expanduser("~/.screenlayout")
+    LAYOUTS_GLOB = os.path.join(LAYOUTS_PATH, "*.sh")
     SELF_PATH = os.path.abspath(__file__)
-    MAIN_ICON = 'video-display'
-    ARANDR_ICON = 'preferences-desktop-display'
+    MAIN_ICON = "video-display"
+    ARANDR_ICON = "preferences-desktop-display"
     LAYOUT_ICON_RE = re.compile(r'META:ICON[ \t]*=[ \t]*"(?P<iconname>[^"]*)"', re.I)
 
     def __init__(self):
         self.indicator = appindicator.Indicator.new(
-            'ARandR', self.MAIN_ICON, appindicator.IndicatorCategory.HARDWARE)
+            "ARandR", self.MAIN_ICON, appindicator.IndicatorCategory.HARDWARE
+        )
         self.indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
 
         self.update_menu()
 
     def am_i_in_autostart(self):
         try:
-            filename= xdg.BaseDirectory.load_first_config(
-                'autostart/arandr-indicator.desktop')
+            filename = xdg.BaseDirectory.load_first_config(
+                "autostart/arandr-indicator.desktop"
+            )
             if not filename:
                 return False
 
             entry = xdg.DesktopEntry.DesktopEntry()
             entry.parse(filename)
-            return entry.get('Exec') == self.SELF_PATH
+            return entry.get("Exec") == self.SELF_PATH
         except:
             return False
 
     def create_autostart_desktop_file(self):
-        path = xdg.BaseDirectory.save_config_path('autostart')
-        filename = os.path.join(path, 'arandr-indicator.desktop')
+        path = xdg.BaseDirectory.save_config_path("autostart")
+        filename = os.path.join(path, "arandr-indicator.desktop")
         entry = xdg.DesktopEntry.DesktopEntry()
         entry.new(filename)
-        entry.set('Name', 'ARandR Indicator')
-        entry.set('GenericName', 'Display layout quick menu')
-        entry.set('Comment', 'Quickly change between monitor layouts')
-        entry.set('Exec', self.SELF_PATH)
-        entry.set('Icon', self.MAIN_ICON)
-        entry.set('Terminal', 'false')
-        entry.set('StartupNotify', 'false')
-        entry.set('Categories', 'Settings;HardwareSettings;')
-        entry.set('Type', 'Application')
+        entry.set("Name", "ARandR Indicator")
+        entry.set("GenericName", "Display layout quick menu")
+        entry.set("Comment", "Quickly change between monitor layouts")
+        entry.set("Exec", self.SELF_PATH)
+        entry.set("Icon", self.MAIN_ICON)
+        entry.set("Terminal", "false")
+        entry.set("StartupNotify", "false")
+        entry.set("Categories", "Settings;HardwareSettings;")
+        entry.set("Type", "Application")
         entry.write()
 
     def get_layouts(self):
         return sorted(glob.glob(self.LAYOUTS_GLOB))
 
     def get_icon_name_from_layout_file(self, filename):
-        with open(filename, 'r', encoding='utf8') as f:
+        with open(filename, "r", encoding="utf8") as f:
             head = f.read(512)  # First 512 bytes of the file.
-        for line in head.split('\n'):  # Splitting into lines.
+        for line in head.split("\n"):  # Splitting into lines.
             match = self.LAYOUT_ICON_RE.search(line.strip())
             if match:
-                return match.group('iconname')
+                return match.group("iconname")
 
         return None
 
@@ -124,17 +127,18 @@ class ARandRIndicator:
 
         for name in self.get_layouts():
             basename = os.path.basename(name)
-            pretty_name = re.sub(r'\.sh$', '', basename).replace('_', ' ')
+            pretty_name = re.sub(r"\.sh$", "", basename).replace("_", " ")
             icon_name = self.get_icon_name_from_layout_file(name)
             icon = None
 
             if icon_name:
-                if '.' in icon_name:
-                    icon_path = os.path.join(self.LAYOUTS_PATH, os.path.expanduser(icon_name))
+                if "." in icon_name:
+                    icon_path = os.path.join(
+                        self.LAYOUTS_PATH, os.path.expanduser(icon_name)
+                    )
                     icon = gtk.Image.new_from_file(icon_path)
                 else:
-                    icon = gtk.Image.new_from_icon_name(icon_name,
-                                                        gtk.IconSize.MENU)
+                    icon = gtk.Image.new_from_icon_name(icon_name, gtk.IconSize.MENU)
 
             if icon:
                 item = gtk.ImageMenuItem()
@@ -143,35 +147,36 @@ class ARandRIndicator:
                 item = gtk.MenuItem()
 
             item.set_label(pretty_name)
-            item.connect('activate', self.on_item_click, name)
+            item.connect("activate", self.on_item_click, name)
             menu.append(item)
 
         menu.append(gtk.SeparatorMenuItem())
 
         arandr_item = gtk.ImageMenuItem()
-        arandr_item.set_label('Launch ARandR')
+        arandr_item.set_label("Launch ARandR")
         arandr_item.set_image(
-            gtk.Image.new_from_icon_name(self.ARANDR_ICON, gtk.IconSize.MENU))
-        arandr_item.connect('activate', self.on_launch_arandr)
+            gtk.Image.new_from_icon_name(self.ARANDR_ICON, gtk.IconSize.MENU)
+        )
+        arandr_item.connect("activate", self.on_launch_arandr)
         menu.append(arandr_item)
 
         if xdg and not self.am_i_in_autostart():
             autostart_item = gtk.MenuItem()
-            autostart_item.set_label('Write autostart file')
-            autostart_item.connect('activate', self.on_create_autostart)
+            autostart_item.set_label("Write autostart file")
+            autostart_item.connect("activate", self.on_create_autostart)
             menu.append(autostart_item)
 
         quit_item = gtk.ImageMenuItem(label=gtk.STOCK_QUIT)
         quit_item.set_use_stock(True)
-        quit_item.connect('activate', self.on_quit)
+        quit_item.connect("activate", self.on_quit)
         menu.append(quit_item)
 
         menu.show_all()
 
     def on_directory_changed(self, filemonitor, file, other_file, event_type):
         if event_type in [
-                gio.FileMonitorEvent.CHANGES_DONE_HINT,
-                gio.FileMonitorEvent.DELETED
+            gio.FileMonitorEvent.CHANGES_DONE_HINT,
+            gio.FileMonitorEvent.DELETED,
         ]:
             self.update_menu()
 
@@ -181,7 +186,7 @@ class ARandRIndicator:
             args = [name]
         else:
             # Otherwise, run it through sh.
-            args = ['/bin/sh', name]
+            args = ["/bin/sh", name]
 
         run_and_forget(args, cwd=os.path.dirname(name))
 
@@ -190,13 +195,13 @@ class ARandRIndicator:
         self.update_menu()
 
     def on_launch_arandr(self, widget):
-        run_and_forget(['arandr'], cwd=self.LAYOUTS_PATH)
+        run_and_forget(["arandr"], cwd=self.LAYOUTS_PATH)
 
     def on_quit(self, widget):
         gtk.main_quit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Catch CTRL-C.
     signal.signal(signal.SIGINT, lambda signal, frame: gtk.main_quit())
 
@@ -206,7 +211,7 @@ if __name__ == '__main__':
     # Monitor ~/.screenlayout/ changes
     file = gio.File.new_for_path(app.LAYOUTS_PATH)
     monitor = file.monitor_directory(gio.FileMonitorFlags.NONE, None)
-    monitor.connect('changed', app.on_directory_changed)
+    monitor.connect("changed", app.on_directory_changed)
 
     # Main gtk loop
     gtk.main()
