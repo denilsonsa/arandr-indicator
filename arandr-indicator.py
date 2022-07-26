@@ -43,12 +43,6 @@ gi.require_version("AppIndicator3", "0.1")
 from gi.repository import AppIndicator3 as appindicator
 from gi.repository import Gtk as gtk
 from gi.repository import Gio as gio
-import glob
-import os
-import os.path
-import re
-import signal
-import subprocess
 
 try:
     import xdg
@@ -57,9 +51,13 @@ try:
 except ImportError:
     xdg = None
 
-
-def run_and_forget(args, **kwargs):
-    subprocess.Popen(args, shell=False, close_fds=True, **kwargs)
+# Built-in Python modules:
+import glob
+import os
+import os.path
+import re
+import signal
+import subprocess
 
 
 class ARandRIndicator:
@@ -71,12 +69,32 @@ class ARandRIndicator:
     LAYOUT_ICON_RE = re.compile(r'META:ICON[ \t]*=[ \t]*"(?P<iconname>[^"]*)"', re.I)
 
     def __init__(self):
+        self.child_processes = []
+        signal.signal(signal.SIGCHLD, self.poll_child_processes)
+
         self.indicator = appindicator.Indicator.new(
             "ARandR", self.MAIN_ICON, appindicator.IndicatorCategory.HARDWARE
         )
         self.indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
 
         self.update_menu()
+
+    def run_and_forget(self, args, **kwargs):
+        """Runs a new process in the background and forgets about it.
+        """
+        p = subprocess.Popen(args, shell=False, close_fds=True, **kwargs)
+        self.child_processes.append(p)
+
+    def poll_child_processes(self, *args):
+        """Clears up any zombie child processes.
+
+        Child processes send a SIGCHLD signal to the parent when they
+        terminate. However, those processes remain in a zombie state until the
+        parent reads the return code from them.
+
+        In other words, this function here prevents a zombie outbreak.
+        """
+        self.child_processes = [p for p in self.child_processes if p.poll() is not None]
 
     def am_i_in_autostart(self):
         try:
@@ -188,14 +206,14 @@ class ARandRIndicator:
             # Otherwise, run it through sh.
             args = ["/bin/sh", name]
 
-        run_and_forget(args, cwd=os.path.dirname(name))
+        self.run_and_forget(args, cwd=os.path.dirname(name))
 
     def on_create_autostart(self, widget):
         self.create_autostart_desktop_file()
         self.update_menu()
 
     def on_launch_arandr(self, widget):
-        run_and_forget(["arandr"], cwd=self.LAYOUTS_PATH)
+        self.run_and_forget(["arandr"], cwd=self.LAYOUTS_PATH)
 
     def on_quit(self, widget):
         gtk.main_quit()
