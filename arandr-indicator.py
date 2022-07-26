@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Simple arandr menu for changing the monitor layout.
 # See README for detailed information.
@@ -37,15 +36,30 @@
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 # DAMAGE.
 
-# GTK / GObject Introspection
+# GTK / GLib / GObject Introspection
+# https://wiki.gnome.org/Projects/GObjectIntrospection
+# https://gi.readthedocs.io/
+# https://pygobject.readthedocs.io/
 import gi
 
-gi.require_version("AppIndicator3", "0.1")
-from gi.repository import AppIndicator3 as appindicator
+gi.require_version("Gtk", "3.0")
+gi.require_version("Gio", "2.0")
 from gi.repository import Gtk as gtk
 from gi.repository import Gio as gio
 
-# Optional dependency.
+# Try one of the two supported libraries:
+try:
+    gi.require_version("AppIndicator3", "0.1")
+    from gi.repository import AppIndicator3 as appindicator
+except (ImportError, ValueError):
+    gi.require_version("AyatanaAppIndicator3", "0.1")
+    from gi.repository import AyatanaAppIndicator3 as appindicator
+
+# Optional dependency: PyXDG
+# https://freedesktop.org/wiki/Software/pyxdg/
+# https://cgit.freedesktop.org/xdg/pyxdg/
+# https://gitlab.freedesktop.org/xdg/pyxdg
+# https://github.com/takluyver/pyxdg
 try:
     import xdg
     import xdg.BaseDirectory
