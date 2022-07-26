@@ -204,7 +204,7 @@ if __name__ == '__main__':
     app = ARandRIndicator()
 
     # Monitor ~/.screenlayout/ changes
-    file = gio.File.new_for_uri('file://' + app.LAYOUTS_PATH)
+    file = gio.File.new_for_path(app.LAYOUTS_PATH)
     monitor = file.monitor_directory(gio.FileMonitorFlags.NONE, None)
     monitor.connect('changed', app.on_directory_changed)
 
