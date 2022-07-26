@@ -37,6 +37,7 @@
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 # DAMAGE.
 
+# GTK / GObject Introspection
 import gi
 
 gi.require_version("AppIndicator3", "0.1")
@@ -44,6 +45,7 @@ from gi.repository import AppIndicator3 as appindicator
 from gi.repository import Gtk as gtk
 from gi.repository import Gio as gio
 
+# Optional dependency.
 try:
     import xdg
     import xdg.BaseDirectory
@@ -77,11 +79,15 @@ class ARandRIndicator:
         self.update_menu()
 
     def run_and_forget(self, args, **kwargs):
-        """Runs a new process in the background and forgets about it.
-        """
+        """Runs a new process in the background and forgets about it."""
         subprocess.Popen(args, shell=False, close_fds=True, **kwargs)
 
     def am_i_in_autostart(self):
+        """Checks if this tool is currently configured in the XDG autostart directory.
+
+        This check isn't fool-proof, it won't detect some edge cases, but it
+        should work well enough for most scenarios.
+        """
         try:
             filename = xdg.BaseDirectory.load_first_config(
                 "autostart/arandr-indicator.desktop"
@@ -96,6 +102,11 @@ class ARandRIndicator:
             return False
 
     def create_autostart_desktop_file(self):
+        """As the function name says, it creates an autostart desktop file.
+
+        This function will setup this tool to be autostarted on most desktop
+        environments. It greatly simplifies the onboarding of new users.
+        """
         path = xdg.BaseDirectory.save_config_path("autostart")
         filename = os.path.join(path, "arandr-indicator.desktop")
         entry = xdg.DesktopEntry.DesktopEntry()
@@ -112,9 +123,13 @@ class ARandRIndicator:
         entry.write()
 
     def get_layouts(self):
+        """Returns a sorted list of the available layout script files."""
         return sorted(glob.glob(self.LAYOUTS_GLOB))
 
     def get_icon_name_from_layout_file(self, filename):
+        """Given a layout script file, reads its metadata to find an optional
+        icon image filename.
+        """
         with open(filename, "r", encoding="utf8") as f:
             head = f.read(512)  # First 512 bytes of the file.
         for line in head.split("\n"):  # Splitting into lines.
