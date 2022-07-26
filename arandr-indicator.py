@@ -69,9 +69,6 @@ class ARandRIndicator:
     LAYOUT_ICON_RE = re.compile(r'META:ICON[ \t]*=[ \t]*"(?P<iconname>[^"]*)"', re.I)
 
     def __init__(self):
-        self.child_processes = []
-        signal.signal(signal.SIGCHLD, self.poll_child_processes)
-
         self.indicator = appindicator.Indicator.new(
             "ARandR", self.MAIN_ICON, appindicator.IndicatorCategory.HARDWARE
         )
@@ -82,19 +79,7 @@ class ARandRIndicator:
     def run_and_forget(self, args, **kwargs):
         """Runs a new process in the background and forgets about it.
         """
-        p = subprocess.Popen(args, shell=False, close_fds=True, **kwargs)
-        self.child_processes.append(p)
-
-    def poll_child_processes(self, *args):
-        """Clears up any zombie child processes.
-
-        Child processes send a SIGCHLD signal to the parent when they
-        terminate. However, those processes remain in a zombie state until the
-        parent reads the return code from them.
-
-        In other words, this function here prevents a zombie outbreak.
-        """
-        self.child_processes = [p for p in self.child_processes if p.poll() is not None]
+        subprocess.Popen(args, shell=False, close_fds=True, **kwargs)
 
     def am_i_in_autostart(self):
         try:
