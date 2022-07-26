@@ -67,7 +67,7 @@ class ARandRIndicator:
     SELF_PATH = os.path.abspath(__file__)
     MAIN_ICON = 'video-display'
     ARANDR_ICON = 'preferences-desktop-display'
-    LAYOUT_ICON_RE = re.compile(br'META:ICON[ \t]*=[ \t]*"(?P<iconname>[^"]*)"', re.I)
+    LAYOUT_ICON_RE = re.compile(r'META:ICON[ \t]*=[ \t]*"(?P<iconname>[^"]*)"', re.I)
 
     def __init__(self):
         self.indicator = appindicator.Indicator.new(
@@ -109,11 +109,10 @@ class ARandRIndicator:
         return sorted(glob.glob(self.LAYOUTS_GLOB))
 
     def get_icon_name_from_layout_file(self, filename):
-        with open(filename, 'rb') as f:
+        with open(filename, 'r', encoding='utf8') as f:
             head = f.read(512)  # First 512 bytes of the file.
-        for line in head.split(b'\n'):  # Splitting into lines.
-            line = line.strip(b' \t\n\r')  # Stripping whitespace.
-            match = self.LAYOUT_ICON_RE.search(line)
+        for line in head.split('\n'):  # Splitting into lines.
+            match = self.LAYOUT_ICON_RE.search(line.strip())
             if match:
                 return match.group('iconname')
 
