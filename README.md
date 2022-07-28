@@ -11,6 +11,8 @@ Demonstration video on YouTube:
 Requirements
 ------------
 
+TODO: Update these requirements to the latest Python 3.x version. See also [TODO.md](TODO.md).
+
 * [ARandR](http://christian.amsuess.com/tools/arandr/) (optional)
 * Python 2.7
 * [PyGTK](http://www.pygtk.org/)
