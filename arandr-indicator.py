@@ -137,8 +137,17 @@ class ARandRIndicator:
         entry.write()
 
     def get_layouts(self):
-        """Returns a sorted list of the available layout script files."""
-        return sorted(glob.glob(self.LAYOUTS_GLOB))
+        """Returns a sorted list of the available layout script files.
+
+        Returns a list of a tuple of (full filename, basename, pretty name).
+        """
+        arr = []
+        for pathname in glob.glob(self.LAYOUTS_GLOB):
+            basename = os.path.basename(pathname)
+            pretty_name = re.sub(r"\.sh$", "", basename).replace("_", " ")
+            arr.append((pathname, basename, pretty_name))
+
+        return sorted(arr, key=lambda x: (x[2], x[0]))
 
     def get_icon_name_from_layout_file(self, filename):
         """Given a layout script file, reads its metadata to find an optional
@@ -157,10 +166,8 @@ class ARandRIndicator:
         menu = gtk.Menu()
         self.indicator.set_menu(menu)
 
-        for name in self.get_layouts():
-            basename = os.path.basename(name)
-            pretty_name = re.sub(r"\.sh$", "", basename).replace("_", " ")
-            icon_name = self.get_icon_name_from_layout_file(name)
+        for (pathname, basename, pretty_name) in self.get_layouts():
+            icon_name = self.get_icon_name_from_layout_file(pathname)
             icon = None
 
             if icon_name:
@@ -179,7 +186,7 @@ class ARandRIndicator:
                 item = gtk.MenuItem()
 
             item.set_label(pretty_name)
-            item.connect("activate", self.on_item_click, name)
+            item.connect("activate", self.on_item_click, pathname)
             menu.append(item)
 
         menu.append(gtk.SeparatorMenuItem())
